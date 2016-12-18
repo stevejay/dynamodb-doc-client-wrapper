@@ -14,6 +14,10 @@ $ npm install --save dynamodb-doc-client-wrapper
 
 ## Usage
 
+```js
+
+```
+
 ## API
 
 ### normalise(object, normaliser)
