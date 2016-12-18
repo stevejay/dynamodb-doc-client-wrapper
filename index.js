@@ -105,12 +105,23 @@ function batchGet(params) {
         });
 }
 
+function get(params) {
+    return documentClient.get(params).promise()
+        .then(data => {
+            if (!data.Item) {
+                throw new Error('[404] Not Found');
+            }
+
+            return data.Item;
+        });
+}
+
 module.exports = {
     batchGet: batchGet,
     batchWrite: null, // TODO
     query: query,
     scan: scan,
-    get: params => documentClient.get(params).promise(),
+    get: get,
     delete: params => documentClient.delete(params).promise(),
     put: params => documentClient.put(params).promise()
 };
