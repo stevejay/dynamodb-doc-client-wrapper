@@ -53,7 +53,7 @@ function batchGetImpl(params) {
         let hasUnprocessedKeys = false;
 
         tableNames.forEach(tableName => {
-            const unprocessedKeys = data.UnprocessedKeys[tableName];
+            const unprocessedKeys = data.UnprocessedKeys[tableName] || [];
 
             if (unprocessedKeys.length) {
                 takeParams.RequestItems[tableName].Keys = unprocessedKeys;
@@ -64,7 +64,6 @@ function batchGetImpl(params) {
         });
 
         if (hasUnprocessedKeys) {
-            console.log('getting unprocessed keys', JSON.stringify(takeParams));
             documentClient.batchGet(takeParams).promise().then(resultHandler);
         } else {
             takeParams = batchTakeManager.getTakeParams();
@@ -72,7 +71,6 @@ function batchGetImpl(params) {
             if (!takeParams) {
                 return result;
             } else {
-                console.log('getting next keys batch', JSON.stringify(takeParams));
                 documentClient.batchGet(takeParams).promise().then(resultHandler);
             }
         }
