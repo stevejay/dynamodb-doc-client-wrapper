@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/stevejay/dynamodb-doc-client-wrapper"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "engines": {
     "node": ">=4.3"
   },
@@ -12,7 +12,7 @@
   "main": "index.js",
   "scripts": {
     "test": "NODE_ENV=test mocha --growl --recursive",
-      "posttest": "npm run lint",
+    "posttest": "npm run lint",
     "lint": "jshint .",
     "cover": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
