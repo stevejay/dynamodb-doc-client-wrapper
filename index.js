@@ -50,6 +50,8 @@ function batchGetImpl(params) {
                 data.Responses[tableName]);
         });
 
+        console.log('got: ' + JSON.stringify(data));
+
         let hasUnprocessedKeys = false;
 
         tableNames.forEach(tableName => {
@@ -71,7 +73,7 @@ function batchGetImpl(params) {
             if (!takeParams) {
                 return result;
             } else {
-                documentClient.batchGet(takeParams).promise().then(resultHandler);
+                return documentClient.batchGet(takeParams).promise().then(resultHandler);
             }
         }
     };
@@ -89,6 +91,8 @@ function batchGet(params) {
 
     return batchGetImpl(params)
         .then(result => {
+            console.log(result, JSON.stringify(result));
+
             tableNames.forEach(tableName => {
                 const responsesForTable = result.Responses[tableName] || [];
 
