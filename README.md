@@ -15,7 +15,14 @@ $ npm install --save dynamodb-doc-client-wrapper
 ## Usage
 
 ```js
+const dynamodb = require('dynamodb-doc-client-wrapper');
 
+const response = yield dynamodb.query({
+    TableName: 'MyTable',
+    KeyConditionExpression: 'tagType = :tagType',
+    ExpressionAttributeValues: { ':tagType': 'audience' },
+    ProjectionExpression: 'id, label'
+});
 ```
 
 ## API
