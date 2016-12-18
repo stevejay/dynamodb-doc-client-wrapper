@@ -7,6 +7,8 @@ For building complete result sets from the AWS DynamoDB API DocumentClient class
 [![Coverage Status](https://coveralls.io/repos/github/stevejay/dynamodb-doc-client-wrapper/badge.svg?branch=master)](https://coveralls.io/github/stevejay/dynamodb-doc-client-wrapper?branch=master)
 [![dependency status](https://david-dm.org/stevejay/dynamodb-doc-client-wrapper.svg)](https://david-dm.org/stevejay/dynamodb-doc-client-wrapper)
 
+[![NPM](https://nodei.co/npm/dynamodb-doc-client-wrapper.png)](https://nodei.co/npm/dynamodb-doc-client-wrapper/)
+
 ## Install
 
 ```
