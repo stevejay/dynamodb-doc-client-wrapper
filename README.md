@@ -15,33 +15,15 @@ $ npm install --save dynamodb-doc-client-wrapper
 ## Usage
 
 ```js
-const dynamodb = require('dynamodb-doc-client-wrapper');
+const clientWrapper = require('dynamodb-doc-client-wrapper');
 
-const response = yield dynamodb.query({
+const response = yield clientWrapper.query({
     TableName: 'MyTable',
     KeyConditionExpression: 'tagType = :tagType',
     ExpressionAttributeValues: { ':tagType': 'audience' },
     ProjectionExpression: 'id, label'
 });
 ```
-
-## API
-
-### normalise(object, normaliser)
-
-Mutates `object` to normalise it according to the `normaliser`.
-
-#### object
-
-Type: `Object`
-
-The object to normalise.
-
-#### normaliser
-
-Type: `Object`
-
-The normaliser object that specifies the normalisations to apply to the object.
 
 ## License
 
