@@ -2,6 +2,7 @@
 
 const should = require('should');
 const sinon = require('sinon');
+const range = require('lodash.range');
 const documentClient = require('../lib/documentClient');
 const clientWrapper = require('../index.js');
 
@@ -68,6 +69,75 @@ describe('dynamodb-doc-client-wrapper', function() {
                         Responses: {
                             Table1: [{ id: 1 }, { id: 2 }],
                             Table2: [{ id: 3 }, { id: 4 }]
+                        }
+                    });
+                    done();
+                })
+                .catch(err => done(err));
+        });
+
+        it('should execute a batchGet where there are too many entities to get in one take', function(done) {
+            const params = {
+                RequestItems: {
+                    Table1: {
+                        Keys: range(1, 103).map(x => ({ id: x }))
+                    },
+                    Table2: {
+                        Keys: [{ id: 103 }, { id: 104 }]
+                    }
+                }
+            };
+
+            let invocationCount = 0;
+
+            sinon.stub(
+                documentClient, 'batchGet',
+                args => {
+                    ++invocationCount;
+
+                    if (invocationCount === 1) {
+                        should(args).eql({
+                            RequestItems: {
+                                Table1: {
+                                    Keys: range(1, 101).map(x => ({ id: x }))
+                                }
+                            }
+                        });
+
+                        return Promise.resolve({
+                            Responses: {
+                                Table1: range(1, 101).map(x => ({ id: x }))
+                            }
+                        });
+                    } else if (invocationCount === 2) {
+                        should(args).eql({
+                            RequestItems: {
+                                Table1: {
+                                    Keys: [{ id: 101 }, { id: 102 }]
+                                },
+                                Table2: {
+                                    Keys: [{ id: 103 }, { id: 104 }]
+                                }
+                            }
+                        });
+
+                        return Promise.resolve({
+                            Responses: {
+                                Table1: [{ id: 101 }, { id: 102 }],
+                                Table2: [{ id: 103 }, { id: 104 }]
+                            }
+                        });
+                    } else {
+                        throw new Error(`invocation count out of range: ${invocationCount}`);
+                    }
+                });
+
+            clientWrapper.batchGet(params)
+                .then(items => {
+                    should(items).eql({
+                        Responses: {
+                            Table1: range(1, 103).map(x => ({ id: x })),
+                            Table2: [{ id: 103 }, { id: 104 }]
                         }
                     });
                     done();

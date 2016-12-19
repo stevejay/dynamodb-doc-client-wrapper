@@ -1,11 +1,15 @@
 # dynamodb-doc-client-wrapper
 
-For building complete result sets from the AWS DynamoDB API DocumentClient class
+A wrapper around the AWS DynamoDB DocumentClient class that handles
+building complete result sets from the `query`, `scan` and `batchGet`
+methods.
 
 [![npm version](https://badge.fury.io/js/dynamodb-doc-client-wrapper.svg)](https://badge.fury.io/js/dynamodb-doc-client-wrapper)
 [![Codeship Status for stevejay/dynamodb-doc-client-wrapper](https://app.codeship.com/projects/d832c8d0-a77d-0134-c8f7-7eca77d71521/status?branch=master)](https://app.codeship.com/projects/191146)
 [![Coverage Status](https://coveralls.io/repos/github/stevejay/dynamodb-doc-client-wrapper/badge.svg?branch=master)](https://coveralls.io/github/stevejay/dynamodb-doc-client-wrapper?branch=master)
-[![dependency status](https://david-dm.org/stevejay/dynamodb-doc-client-wrapper.svg)](https://david-dm.org/stevejay/dynamodb-doc-client-wrapper)
+[![bitHound Overall Score](https://www.bithound.io/github/stevejay/dynamodb-doc-client-wrapper/badges/score.svg)](https://www.bithound.io/github/stevejay/dynamodb-doc-client-wrapper)
+[![bitHound Dependencies](https://www.bithound.io/github/stevejay/dynamodb-doc-client-wrapper/badges/dependencies.svg)](https://www.bithound.io/github/stevejay/dynamodb-doc-client-wrapper/master/dependencies/npm)
+[![bitHound Dev Dependencies](https://www.bithound.io/github/stevejay/dynamodb-doc-client-wrapper/badges/devDependencies.svg)](https://www.bithound.io/github/stevejay/dynamodb-doc-client-wrapper/master/dependencies/npm)
 
 [![NPM](https://nodei.co/npm/dynamodb-doc-client-wrapper.png)](https://nodei.co/npm/dynamodb-doc-client-wrapper/)
 
@@ -15,7 +19,14 @@ For building complete result sets from the AWS DynamoDB API DocumentClient class
 $ npm install --save dynamodb-doc-client-wrapper
 ```
 
+You also need to have the `aws-sdk` package available. When running 
+AWS Lambda functions on AWS, that package is already installed; you 
+can install it as a dev dependency so it is available locally when
+testing.
+
 ## Usage
+
+### Query
 
 ```js
 const clientWrapper = require('dynamodb-doc-client-wrapper');
@@ -26,7 +37,113 @@ const response = yield clientWrapper.query({
     ExpressionAttributeValues: { ':tagType': 'audience' },
     ProjectionExpression: 'id, label'
 });
+
+// response is a list of db items.
 ```
+
+The response will have all matching items, even if the query
+had to be done in multiple takes because of the limit
+on total response size in DynamoDB.
+
+### Scan
+
+```js
+const clientWrapper = require('dynamodb-doc-client-wrapper');
+
+const response = yield clientWrapper.scan({
+    TableName: 'MyTable',
+    ProjectionExpression: 'id, label'
+});
+
+// response is a list of db items.
+```
+
+The response will have all matching items, even if the scan
+had to be done in multiple takes because of the limit
+on total response size in DynamoDB.
+
+### BatchGet
+
+```js
+const clientWrapper = require('dynamodb-doc-client-wrapper');
+
+const response = yield clientWrapper.batchGet({
+    RequestItems: {
+        'Table1': {
+            Keys: [{ id: 1 }, { id: 2 }]
+        },
+        'Table2': {
+            Keys: [{ id: 3 }, { id: 4 }]
+        }
+    }
+});
+
+// response is an object with the results for each table in it, e.g.:
+//
+// {
+//     Responses: {
+//         'Table1': [
+//             { id: 1, name: 'a' },
+//             { id: 2, name: 'b' }
+//         ],
+//         'Table2': [
+//             { id: 3, name: 'c' },
+//             { id: 4, name: 'd' }
+//         ]
+//     }
+// }
+```
+
+All items will be retrieved, even if the number of items to be retrieved
+exceeds the DynamoDB limit of 100 items, or if the limit
+on total response size in DynamoDB was exceeded.
+
+An exception is thrown if any requested db item was not found. The 
+exception message is '[404] Entity Not Found'.
+
+### Get
+
+```js
+const clientWrapper = require('dynamodb-doc-client-wrapper');
+
+const response = yield clientWrapper.get({
+    TableName: 'MyTable',
+    Index: { id: 1 }
+});
+
+// response is the item, e.g. { id: 1, name: 'a' }
+```
+
+An exception is thrown if the requested db item was not found. The 
+exception message is '[404] Entity Not Found'.
+
+### Put
+
+```js
+const clientWrapper = require('dynamodb-doc-client-wrapper');
+
+const response = yield clientWrapper.put({
+    TableName: 'MyTable',
+    Item: { id: 1, name: 'a' }
+});
+```
+
+This is a simple pass-through wrapper around the
+`AWS.DynamoDB.DocumentClient.put` method.
+
+### Delete
+
+```js
+const clientWrapper = require('dynamodb-doc-client-wrapper');
+
+const response = yield clientWrapper.delete({
+    TableName: 'MyTable',
+    Index: { id: 1 }
+});
+```
+
+This is a simple pass-through wrapper around the
+`AWS.DynamoDB.DocumentClient.delete` method.
 
 ## License
 

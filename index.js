@@ -51,7 +51,10 @@ function batchGetImpl(params) {
         let hasUnprocessedKeys = false;
 
         tableNames.forEach(tableName => {
-            const unprocessedKeys = data.UnprocessedKeys[tableName] || [];
+            const unprocessedKeys = 
+                data.UnprocessedKeys ?
+                data.UnprocessedKeys[tableName] || [] :
+                [];
 
             if (unprocessedKeys.length) {
                 takeParams.RequestItems[tableName].Keys = unprocessedKeys;
