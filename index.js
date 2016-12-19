@@ -1,9 +1,7 @@
 'use strict';
 
-const AWS = require('aws-sdk');
+const documentClient = require('./lib/documentClient');
 const BatchGetParamsTakeManager = require('./lib/BatchGetParamsTakeManager');
-
-const documentClient = new AWS.DynamoDB.DocumentClient();
 
 function query(params) {
     return _applyExclusiveStartAction('query', params);
@@ -23,13 +21,13 @@ function _applyExclusiveStartAction(action, params) {
 
         if (data.LastEvaluatedKey) {
             paramsCopy.ExclusiveStartKey = data.LastEvaluatedKey;
-            return documentClient[action](paramsCopy).promise().then(resultHandler);
+            return documentClient[action](paramsCopy).then(resultHandler);
         } else {
             return result;
         }
     };
 
-    return documentClient[action](paramsCopy).promise().then(resultHandler);
+    return documentClient[action](paramsCopy).then(resultHandler);
 }
 
 function batchGetImpl(params) {
@@ -64,19 +62,19 @@ function batchGetImpl(params) {
         });
 
         if (hasUnprocessedKeys) {
-            documentClient.batchGet(takeParams).promise().then(resultHandler);
+            documentClient.batchGet(takeParams).then(resultHandler);
         } else {
             takeParams = batchTakeManager.getTakeParams();
 
             if (!takeParams) {
                 return result;
             } else {
-                return documentClient.batchGet(takeParams).promise().then(resultHandler);
+                return documentClient.batchGet(takeParams).then(resultHandler);
             }
         }
     };
 
-    return documentClient.batchGet(takeParams).promise().then(resultHandler);
+    return documentClient.batchGet(takeParams).then(resultHandler);
 }
 
 function batchGet(params) {
@@ -102,8 +100,10 @@ function batchGet(params) {
 }
 
 function get(params) {
-    return documentClient.get(params).promise()
+    return documentClient.get(params)
         .then(data => {
+            console.log('get data: ' + JSON.stringify(data));
+
             if (!data.Item) {
                 throw new Error('[404] Not Found');
             }
@@ -114,10 +114,9 @@ function get(params) {
 
 module.exports = {
     batchGet: batchGet,
-    batchWrite: null, // TODO
     query: query,
     scan: scan,
     get: get,
-    delete: params => documentClient.delete(params).promise(),
-    put: params => documentClient.put(params).promise()
+    delete: params => documentClient.delete(params),
+    put: params => documentClient.put(params)
 };
