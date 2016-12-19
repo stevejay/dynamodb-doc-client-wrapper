@@ -14,20 +14,20 @@ function scan(params) {
 function _applyExclusiveStartAction(action, params) {
     const paramsCopy = Object.assign({}, params);
     const result = [];
-    let resultHandler = null;
+    let clientResultHandler = null;
 
-    resultHandler = data => {
+    clientResultHandler = data => {
         Array.prototype.push.apply(result, data.Items || []);
 
         if (data.LastEvaluatedKey) {
             paramsCopy.ExclusiveStartKey = data.LastEvaluatedKey;
-            return documentClient[action](paramsCopy).then(resultHandler);
+            return documentClient[action](paramsCopy).then(clientResultHandler);
         } else {
             return result;
         }
     };
 
-    return documentClient[action](paramsCopy).then(resultHandler);
+    return documentClient[action](paramsCopy).then(clientResultHandler);
 }
 
 function batchGetImpl(params) {
@@ -62,7 +62,7 @@ function batchGetImpl(params) {
         });
 
         if (hasUnprocessedKeys) {
-            documentClient.batchGet(takeParams).then(resultHandler);
+            return documentClient.batchGet(takeParams).then(resultHandler);
         } else {
             takeParams = batchTakeManager.getTakeParams();
 
@@ -102,15 +102,15 @@ function batchGet(params) {
 function get(params) {
     return documentClient.get(params)
         .then(data => {
-            console.log('get data: ' + JSON.stringify(data));
-
             if (!data.Item) {
-                throw new Error('[404] Not Found');
+                throw new Error('[404] Entity Not Found');
             }
 
             return data.Item;
         });
 }
+
+// TODO make 404 message into a config option
 
 module.exports = {
     batchGet: batchGet,
