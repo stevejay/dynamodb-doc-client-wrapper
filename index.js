@@ -50,8 +50,6 @@ function batchGetImpl(params) {
                 data.Responses[tableName]);
         });
 
-        console.log('got: ' + JSON.stringify(data));
-
         let hasUnprocessedKeys = false;
 
         tableNames.forEach(tableName => {
@@ -91,8 +89,6 @@ function batchGet(params) {
 
     return batchGetImpl(params)
         .then(result => {
-            console.log(result, JSON.stringify(result));
-
             tableNames.forEach(tableName => {
                 const responsesForTable = result.Responses[tableName] || [];
 
