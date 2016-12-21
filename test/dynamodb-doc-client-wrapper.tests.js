@@ -286,7 +286,7 @@ describe('dynamodb-doc-client-wrapper', function() {
                 });
 
             clientWrapper.batchGet(params)
-                .then(item => {
+                .then(() => {
                     done('should have thrown an exception');
                 })
                 .catch(err => {
@@ -296,6 +296,47 @@ describe('dynamodb-doc-client-wrapper', function() {
                         done(`exception thrown but it had the wrong message: ${err.message}`);
                     }
                 });
+        });
+    });
+
+    describe('batchGetBasic', function() {
+        afterEach(function () {
+            documentClient.batchGet.restore();
+        });
+
+        it('should execute a batchGet where the result is in two takes for one of the tables', function(done) {
+            const params = {
+                RequestItems: {
+                    Table1: {
+                        Keys: [{ id: 1 }]
+                    }
+                }
+            };
+
+            sinon.stub(
+                documentClient, 'batchGet',
+                args => {
+                    should(args).eql(params);
+
+                    return Promise.resolve({
+                        Responses: {
+                            Table1: [{ id: 1 }]
+                        },
+                        UnprocessedKeys: {}
+                    });
+                });
+
+            clientWrapper.batchGetBasic(params)
+                .then(response => {
+                    should(response).eql({
+                        Responses: {
+                            Table1: [{ id: 1 }]
+                        },
+                        UnprocessedKeys: {}
+                    });
+                    done();
+                })
+                .catch(err => done(err));
         });
     });
 
@@ -375,6 +416,34 @@ describe('dynamodb-doc-client-wrapper', function() {
             clientWrapper.scan(params)
                 .then(items => {
                     should(items).eql([{ id: 1 }, { id: 2 }]);
+                    done();
+                })
+                .catch(err => done(err));
+        });
+    });
+
+    describe('scanBasic', function() {
+        afterEach(function () {
+            documentClient.scan.restore();
+        });
+
+        it('should scan the db', function(done) {
+            const params = {
+                TableName: 'MyTable',
+                ConsistentRead: false,
+                ExclusiveStartKey: null
+            };
+
+            sinon.stub(
+                documentClient, 'scan',
+                args => {
+                    should(args).eql(params);
+                    return Promise.resolve({ Items: [{ id: 1 }] });
+                });
+
+            clientWrapper.scanBasic(params)
+                .then(response => {
+                    should(response).eql({ Items: [{ id: 1 }] });
                     done();
                 })
                 .catch(err => done(err));
@@ -467,6 +536,35 @@ describe('dynamodb-doc-client-wrapper', function() {
         });
     });
 
+    describe('queryBasic', function() {
+        afterEach(function () {
+            documentClient.query.restore();
+        });
+
+        it('should query the db', function(done) {
+            const params = {
+                TableName: 'MyTable',
+                KeyConditionExpression: 'venueId = :venueId',
+                ExpressionAttributeValues: { ':venueId': 111 },
+                ExclusiveStartKey: null
+            };
+
+            sinon.stub(
+                documentClient, 'query',
+                args => {
+                    should(args).eql(params);
+                    return Promise.resolve({ Items: [{ id: 1 }] });
+                });
+
+            clientWrapper.queryBasic(params)
+                .then(response => {
+                    should(response).eql({ Items: [{ id: 1 }] });
+                    done();
+                })
+                .catch(err => done(err));
+        });
+    });
+
     describe('delete', function() {
         afterEach(function () {
             documentClient.delete.restore();
@@ -486,7 +584,7 @@ describe('dynamodb-doc-client-wrapper', function() {
                 });
 
             clientWrapper.delete(params)
-                .then(item => done())
+                .then(() => done())
                 .catch(err => done(err));
         });
     });
@@ -510,7 +608,7 @@ describe('dynamodb-doc-client-wrapper', function() {
                 });
 
             clientWrapper.put(params)
-                .then(item => done())
+                .then(() => done())
                 .catch(err => done(err));
         });
     });
@@ -555,7 +653,7 @@ describe('dynamodb-doc-client-wrapper', function() {
                 });
 
             clientWrapper.get(params)
-                .then(item => {
+                .then(() => {
                     done('should have thrown an exception');
                 })
                 .catch(err => {
@@ -565,6 +663,33 @@ describe('dynamodb-doc-client-wrapper', function() {
                         done(`exception thrown but it had the wrong message: ${err.message}`);
                     }
                 });
+        });
+    });
+
+    describe('getBasic', function() {
+        afterEach(function () {
+            documentClient.get.restore();
+        });
+
+        it('should get an item from the db', function(done) {
+            const params = {
+                TableName: 'MyTable',
+                Index: { id: 1 }
+            };
+
+            sinon.stub(
+                documentClient, 'get',
+                args => {
+                    should(args).eql(params);
+                    return Promise.resolve({ Item: { id: 1 } });
+                });
+
+            clientWrapper.getBasic(params)
+                .then(response => {
+                    should(response).eql({ Item: { id: 1 } });
+                    done();
+                })
+                .catch(err => done(err));
         });
     });
 });

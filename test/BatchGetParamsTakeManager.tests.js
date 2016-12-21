@@ -175,7 +175,7 @@ describe('BatchGetParamsTakeManager', function() {
             const subject = new BatchGetParamsTakeManager(test.args.params, test.args.maxTake);
             const result = [];
 
-            while (true) {
+            while (true) { // eslint-disable-line no-constant-condition
                 const take = subject.getTakeParams();
 
                 if (take) {

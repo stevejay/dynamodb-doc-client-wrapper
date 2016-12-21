@@ -114,12 +114,17 @@ function get(params) {
 }
 
 // TODO make 404 message into a config option
+// TODO implement batchWrite and batchWriteBasic
 
-module.exports = {
+module.exports = exports = {
     batchGet: batchGet,
+    batchGetBasic: params => documentClient.batchGet(params),
     query: query,
+    queryBasic: params => documentClient.query(params),
     scan: scan,
+    scanBasic: params => documentClient.scan(params),
     get: get,
+    getBasic: params => documentClient.get(params),
     delete: params => documentClient.delete(params),
     put: params => documentClient.put(params)
 };

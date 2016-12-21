@@ -45,6 +45,26 @@ The response will have all matching items, even if the query
 had to be done in multiple takes because of the limit
 on total response size in DynamoDB.
 
+### QueryBasic
+
+```js
+const clientWrapper = require('dynamodb-doc-client-wrapper');
+
+const response = yield clientWrapper.queryBasic({
+    TableName: 'MyTable',
+    KeyConditionExpression: 'tagType = :tagType',
+    ExpressionAttributeValues: { ':tagType': 'audience' },
+    ProjectionExpression: 'id, label'
+});
+
+// response is the raw DynamoDB client response
+```
+
+This is a simple pass-through wrapper around the
+`AWS.DynamoDB.DocumentClient.query` method, for when
+you want access to the entire response object and
+you will manage getting all the results yourself.
+
 ### Scan
 
 ```js
@@ -61,6 +81,24 @@ const response = yield clientWrapper.scan({
 The response will have all matching items, even if the scan
 had to be done in multiple takes because of the limit
 on total response size in DynamoDB.
+
+### ScanBasic
+
+```js
+const clientWrapper = require('dynamodb-doc-client-wrapper');
+
+const response = yield clientWrapper.scanBasic({
+    TableName: 'MyTable',
+    ProjectionExpression: 'id, label'
+});
+
+// response is the raw DynamoDB client response
+```
+
+This is a simple pass-through wrapper around the
+`AWS.DynamoDB.DocumentClient.scan` method, for when
+you want access to the entire response object and
+you will manage getting all the results yourself.
 
 ### BatchGet
 
@@ -101,6 +139,27 @@ on total response size in DynamoDB was exceeded.
 An exception is thrown if any requested db item was not found. The 
 exception message is '[404] Entity Not Found'.
 
+### BatchGetBasic
+
+```js
+const clientWrapper = require('dynamodb-doc-client-wrapper');
+
+const response = yield clientWrapper.batchGetBasic({
+    RequestItems: {
+        'Table1': {
+            Keys: [{ id: 1 }, { id: 2 }]
+        }
+    }
+});
+
+// response is the raw DynamoDB client response
+```
+
+This is a simple pass-through wrapper around the
+`AWS.DynamoDB.DocumentClient.batchGet` method, for when
+you want access to the entire response object and
+you will manage getting all the results yourself. 
+
 ### Get
 
 ```js
@@ -117,12 +176,29 @@ const response = yield clientWrapper.get({
 An exception is thrown if the requested db item was not found. The 
 exception message is '[404] Entity Not Found'.
 
+### GetBasic
+
+```js
+const clientWrapper = require('dynamodb-doc-client-wrapper');
+
+const response = yield clientWrapper.getBasic({
+    TableName: 'MyTable',
+    Index: { id: 1 }
+});
+
+// response is the raw response, e.g., { Item: { id: 1, name: 'a' } }
+```
+
+This is a simple pass-through wrapper around the
+`AWS.DynamoDB.DocumentClient.get` method, for when
+you want access to the entire response object.
+
 ### Put
 
 ```js
 const clientWrapper = require('dynamodb-doc-client-wrapper');
 
-const response = yield clientWrapper.put({
+yield clientWrapper.put({
     TableName: 'MyTable',
     Item: { id: 1, name: 'a' }
 });
@@ -136,7 +212,7 @@ This is a simple pass-through wrapper around the
 ```js
 const clientWrapper = require('dynamodb-doc-client-wrapper');
 
-const response = yield clientWrapper.delete({
+yield clientWrapper.delete({
     TableName: 'MyTable',
     Index: { id: 1 }
 });
