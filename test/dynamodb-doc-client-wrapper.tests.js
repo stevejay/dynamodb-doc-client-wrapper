@@ -692,4 +692,29 @@ describe('dynamodb-doc-client-wrapper', function() {
                 .catch(err => done(err));
         });
     });
+
+    describe('batchWriteBasic', function() {
+        afterEach(function () {
+            documentClient.batchWrite.restore();
+        });
+
+        it('should submit write batch to the db', function(done) {
+            const params = {
+                'MyTable': [
+                    { DeleteRequest: { Key: { id: 1 } } }
+                ]
+            };
+
+            sinon.stub(
+                documentClient, 'batchWrite',
+                args => {
+                    should(args).eql(params);
+                    return Promise.resolve();
+                });
+
+            clientWrapper.batchWriteBasic(params)
+                .then(() => done())
+                .catch(err => done(err));
+        });
+    });
 });

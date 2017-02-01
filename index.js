@@ -114,7 +114,11 @@ function get(params) {
 }
 
 // TODO make 404 message into a config option
-// TODO implement batchWrite and batchWriteBasic
+// TODO implement batchWrite.
+// batchWrite has limits: 
+// - There are more than 25 requests in the batch.
+// - Any individual item in a batch exceeds 400 KB.
+// - The total request size exceeds 16 MB.
 
 module.exports = exports = {
     batchGet: batchGet,
@@ -126,5 +130,6 @@ module.exports = exports = {
     get: get,
     getBasic: params => documentClient.get(params),
     delete: params => documentClient.delete(params),
-    put: params => documentClient.put(params)
+    put: params => documentClient.put(params),
+    batchWriteBasic: params => documentClient.batchWrite(params)
 };
