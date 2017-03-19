@@ -207,6 +207,43 @@ yield clientWrapper.put({
 This is a simple pass-through wrapper around the
 `AWS.DynamoDB.DocumentClient.put` method.
 
+### BatchWrite
+
+```js
+const clientWrapper = require('dynamodb-doc-client-wrapper');
+
+yield clientWrapper.batchWrite({
+    RequestItems: {
+        'Table1': [
+            { DeleteRequest: { Key: { id: 1 } } }
+        ]
+    }
+})
+```
+
+This method ultimately invokes the
+`AWS.DynamoDB.DocumentClient.batchWrite` method,
+but it takes care of batching up the writes so that
+a single request does not exceed the DynamoDB limits,
+and it resubmits unprocessed writes.
+
+### BatchWriteBasic 
+
+```js
+const clientWrapper = require('dynamodb-doc-client-wrapper');
+
+yield clientWrapper.batchWriteBasic({
+    RequestItems: {
+        'Table1': [
+            { DeleteRequest: { Key: { id: 1 } } }
+        ]
+    }
+})
+```
+
+This is a simple pass-through wrapper around the
+`AWS.DynamoDB.DocumentClient.batchWrite` method.
+
 ### Delete
 
 ```js

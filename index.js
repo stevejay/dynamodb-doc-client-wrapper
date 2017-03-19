@@ -2,6 +2,7 @@
 
 const documentClient = require('./lib/documentClient');
 const BatchGetParamsTakeManager = require('./lib/BatchGetParamsTakeManager');
+const BatchWriteParamsTakeManager = require('./lib/BatchWriteParamsTakeManager');
 
 function query(params) {
     return _applyExclusiveStartAction('query', params);
@@ -102,6 +103,46 @@ function batchGet(params) {
         });
 }
 
+function batchWrite(params) {
+    const tableNames = Object.getOwnPropertyNames(params.RequestItems);
+    const batchTakeManager = new BatchWriteParamsTakeManager(params);
+    let takeParams = batchTakeManager.getTakeParams();
+
+    let resultHandler = null;
+
+    resultHandler = data => {
+        let hasUnprocessedItems = false;
+
+        tableNames.forEach(tableName => {
+            const unprocessedItems = 
+                data.UnprocessedItems ?
+                data.UnprocessedItems[tableName] || [] :
+                [];
+
+            if (unprocessedItems.length) {
+                takeParams.RequestItems[tableName] = unprocessedItems;
+                hasUnprocessedItems = true;
+            } else {
+                delete takeParams.RequestItems[tableName];
+            }
+        });
+
+        if (hasUnprocessedItems) {
+            return documentClient.batchWrite(takeParams).then(resultHandler);
+        } else {
+            takeParams = batchTakeManager.getTakeParams();
+
+            if (!takeParams) {
+                return;
+            } else {
+                return documentClient.batchWrite(takeParams).then(resultHandler);
+            }
+        }
+    };
+
+    return documentClient.batchWrite(takeParams).then(resultHandler);
+}
+
 function get(params) {
     return documentClient.get(params)
         .then(data => {
@@ -114,11 +155,6 @@ function get(params) {
 }
 
 // TODO make 404 message into a config option
-// TODO implement batchWrite.
-// batchWrite has limits: 
-// - There are more than 25 requests in the batch.
-// - Any individual item in a batch exceeds 400 KB.
-// - The total request size exceeds 16 MB.
 
 module.exports = exports = {
     batchGet: batchGet,
@@ -131,5 +167,6 @@ module.exports = exports = {
     getBasic: params => documentClient.get(params),
     delete: params => documentClient.delete(params),
     put: params => documentClient.put(params),
+    batchWrite: batchWrite,
     batchWriteBasic: params => documentClient.batchWrite(params)
 };

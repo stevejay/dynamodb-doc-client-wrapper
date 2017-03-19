@@ -693,6 +693,33 @@ describe('dynamodb-doc-client-wrapper', function() {
         });
     });
 
+    describe('batchWrite', function() {
+        afterEach(function () {
+            documentClient.batchWrite.restore();
+        });
+
+        it('should submit write batch to the db', function(done) {
+            const params = {
+                RequestItems: {
+                    'MyTable': [
+                        { DeleteRequest: { Key: { id: 1 } } }
+                    ]
+                }
+            };
+
+            sinon.stub(
+                documentClient, 'batchWrite',
+                args => {
+                    should(args).eql(params);
+                    return Promise.resolve({});
+                });
+
+            clientWrapper.batchWrite(params)
+                .then(() => done())
+                .catch(err => done(err));
+        });
+    });
+
     describe('batchWriteBasic', function() {
         afterEach(function () {
             documentClient.batchWrite.restore();
@@ -700,9 +727,11 @@ describe('dynamodb-doc-client-wrapper', function() {
 
         it('should submit write batch to the db', function(done) {
             const params = {
-                'MyTable': [
-                    { DeleteRequest: { Key: { id: 1 } } }
-                ]
+                RequestItems: {
+                    'MyTable': [
+                        { DeleteRequest: { Key: { id: 1 } } }
+                    ]
+                }
             };
 
             sinon.stub(
