@@ -168,5 +168,6 @@ module.exports = exports = {
     delete: params => documentClient.delete(params),
     put: params => documentClient.put(params),
     batchWrite: batchWrite,
-    batchWriteBasic: params => documentClient.batchWrite(params)
+    batchWriteBasic: params => documentClient.batchWrite(params),
+    update: params => documentClient.update(params)
 };

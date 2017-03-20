@@ -244,6 +244,21 @@ yield clientWrapper.batchWriteBasic({
 This is a simple pass-through wrapper around the
 `AWS.DynamoDB.DocumentClient.batchWrite` method.
 
+### Update
+
+```js
+const clientWrapper = require('dynamodb-doc-client-wrapper');
+
+yield clientWrapper.update({
+    TableName: 'Table',
+    Key: { HashKey : 'hashkey' },
+    UpdateExpression: 'set #a = :x + :y',
+});
+```
+
+This is a simple pass-through wrapper around the
+`AWS.DynamoDB.DocumentClient.update` method.
+
 ### Delete
 
 ```js
