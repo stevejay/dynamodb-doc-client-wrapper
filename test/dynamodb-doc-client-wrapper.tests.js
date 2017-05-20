@@ -666,6 +666,54 @@ describe('dynamodb-doc-client-wrapper', function() {
         });
     });
 
+    describe('tryGet', function() {
+        afterEach(function () {
+            documentClient.get.restore();
+        });
+
+        it('should get an item from the db', function(done) {
+            const params = {
+                TableName: 'MyTable',
+                Index: { id: 1 }
+            };
+
+            sinon.stub(
+                documentClient, 'get',
+                args => {
+                    should(args).eql(params);
+                    return Promise.resolve({ Item: { id: 1 } });
+                });
+
+            clientWrapper.tryGet(params)
+                .then(item => {
+                    should(item).eql({ id: 1 });
+                    done();
+                })
+                .catch(err => done(err));
+        });
+
+        it('should return null if the item is not in the db', function(done) {
+            const params = {
+                TableName: 'MyTable',
+                Index: { id: 1 }
+            };
+
+            sinon.stub(
+                documentClient, 'get',
+                args => {
+                    should(args).eql(params);
+                    return Promise.resolve({});
+                });
+
+            clientWrapper.tryGet(params)
+                .then(item => {
+                    should(item).eql(null);
+                    done();
+                })
+                .catch(err => done(err));
+        });
+    });
+
     describe('getBasic', function() {
         afterEach(function () {
             documentClient.get.restore();

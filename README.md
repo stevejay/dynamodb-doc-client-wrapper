@@ -19,10 +19,7 @@ methods.
 $ npm install --save dynamodb-doc-client-wrapper
 ```
 
-You also need to have the `aws-sdk` package available. When running 
-AWS Lambda functions on AWS, that package is already installed; you 
-can install it as a dev dependency so it is available locally when
-testing.
+You also need to have the `aws-sdk` package available as a peer dependency. When running AWS Lambda functions on AWS, that package is already installed; you can install it as a dev dependency so it is available locally when testing.
 
 ## Usage
 
@@ -175,6 +172,22 @@ const response = yield clientWrapper.get({
 
 An exception is thrown if the requested db item was not found. The 
 exception message is '[404] Entity Not Found'.
+
+### TryGet
+
+```js
+const clientWrapper = require('dynamodb-doc-client-wrapper');
+
+const response = yield clientWrapper.tryGet({
+    TableName: 'MyTable',
+    Index: { id: 1 }
+});
+
+// response is the item, e.g. { id: 1, name: 'a' },
+// or null if the item does not exist in the db.
+```
+
+If the requested db item was not found then `null` is returned.
 
 ### GetBasic
 

@@ -154,6 +154,11 @@ function get(params) {
         });
 }
 
+function tryGet(params) {
+    return documentClient.get(params)
+        .then(data => data.Item || null);
+}
+
 // TODO make 404 message into a config option
 
 module.exports = exports = {
@@ -164,6 +169,7 @@ module.exports = exports = {
     scan: scan,
     scanBasic: params => documentClient.scan(params),
     get: get,
+    tryGet: tryGet,
     getBasic: params => documentClient.get(params),
     delete: params => documentClient.delete(params),
     put: params => documentClient.put(params),
