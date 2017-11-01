@@ -177,3 +177,5 @@ module.exports = exports = {
     batchWriteBasic: params => documentClient.batchWrite(params),
     update: params => documentClient.update(params)
 };
+
+module.exports.documentClient = documentClient;
