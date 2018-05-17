@@ -1,18 +1,18 @@
 'use strict';
 
-const documentClient = require('./lib/documentClient');
+const documentClientFactory = require('./lib/documentClientFactory');
 const BatchGetParamsTakeManager = require('./lib/BatchGetParamsTakeManager');
 const BatchWriteParamsTakeManager = require('./lib/BatchWriteParamsTakeManager');
 
-function query(params) {
-    return _applyExclusiveStartAction('query', params);
+function query(params, documentClient) {
+    return _applyExclusiveStartAction('query', params, documentClient);
 }
 
-function scan(params) {
-    return _applyExclusiveStartAction('scan', params);
+function scan(params, documentClient) {
+    return _applyExclusiveStartAction('scan', params, documentClient);
 }
 
-function _applyExclusiveStartAction(action, params) {
+function _applyExclusiveStartAction(action, params, documentClient) {
     const paramsCopy = Object.assign({}, params);
     const result = [];
     let clientResultHandler = null;
@@ -31,7 +31,7 @@ function _applyExclusiveStartAction(action, params) {
     return documentClient[action](paramsCopy).then(clientResultHandler);
 }
 
-function batchGetImpl(params) {
+function batchGetImpl(params, documentClient) {
     const result = { Responses: {} };
 
     const tableNames = Object.getOwnPropertyNames(params.RequestItems);
@@ -81,7 +81,7 @@ function batchGetImpl(params) {
     return documentClient.batchGet(takeParams).then(resultHandler);
 }
 
-function batchGet(params) {
+function batchGet(params, documentClient, notFoundMsg) {
     const paramsLookup = {};
     const tableNames = Object.getOwnPropertyNames(params.RequestItems);
 
@@ -89,13 +89,13 @@ function batchGet(params) {
         paramsLookup[tableName] = params.RequestItems[tableName].Keys.length
     );
 
-    return batchGetImpl(params)
+    return batchGetImpl(params, documentClient)
         .then(result => {
             tableNames.forEach(tableName => {
                 const responsesForTable = result.Responses[tableName] || [];
 
                 if (responsesForTable.length !== paramsLookup[tableName]) {
-                    throw new Error('[404] Entity Not Found');
+                    throw new Error(notFoundMsg);
                 }
             });
 
@@ -103,7 +103,7 @@ function batchGet(params) {
         });
 }
 
-function batchWrite(params) {
+function batchWrite(params, documentClient) {
     const tableNames = Object.getOwnPropertyNames(params.RequestItems);
     const batchTakeManager = new BatchWriteParamsTakeManager(params);
     let takeParams = batchTakeManager.getTakeParams();
@@ -143,37 +143,40 @@ function batchWrite(params) {
     return documentClient.batchWrite(takeParams).then(resultHandler);
 }
 
-function get(params) {
+function get(params, documentClient, notFoundMsg) {
     return documentClient.get(params)
         .then(data => {
             if (!data.Item) {
-                throw new Error('[404] Entity Not Found');
+                throw new Error(notFoundMsg);
             }
 
             return data.Item;
         });
 }
 
-function tryGet(params) {
+function tryGet(params, documentClient) {
     return documentClient.get(params)
         .then(data => data.Item || null);
 }
 
-// TODO make 404 message into a config option
-
-module.exports = exports = {
-    batchGet: batchGet,
-    batchGetBasic: params => documentClient.batchGet(params),
-    query: query,
-    queryBasic: params => documentClient.query(params),
-    scan: scan,
-    scanBasic: params => documentClient.scan(params),
-    get: get,
-    tryGet: tryGet,
-    getBasic: params => documentClient.get(params),
-    delete: params => documentClient.delete(params),
-    put: params => documentClient.put(params),
-    batchWrite: batchWrite,
-    batchWriteBasic: params => documentClient.batchWrite(params),
-    update: params => documentClient.update(params)
-};
+module.exports = exports = function (options) {
+    options = options || {}
+    const documentClient = documentClientFactory(options.dynamodb || null)
+    const notFoundMsg = options.notFoundMsg || '[404] Entity Not Found'
+    const module = {
+        batchGet: params => batchGet(params, documentClient, notFoundMsg),
+        batchGetBasic: params => documentClient.batchGet(params),
+        query: params => query(params, documentClient),
+        queryBasic: params => documentClient.query(params),
+        scan: params => scan(params, documentClient),
+        scanBasic: params => documentClient.scan(params),
+        get: params => get(params, documentClient, notFoundMsg),
+        tryGet: params => tryGet(params, documentClient),
+        getBasic: params => documentClient.get(params),
+        delete: params => documentClient.delete(params),
+        put: params => documentClient.put(params),
+        batchWrite: params => batchWrite(params, documentClient),
+        batchWriteBasic: params => documentClient.batchWrite(params),
+        update: params => documentClient.update(params)
+    };
+}

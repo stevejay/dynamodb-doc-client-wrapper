@@ -3,8 +3,8 @@
 const should = require('should');
 const sinon = require('sinon');
 const range = require('lodash.range');
-const documentClient = require('../lib/documentClient');
-const clientWrapper = require('../index.js');
+const documentClient = require('../lib/documentClientFactory');
+const clientWrapper = require('../index.js')();
 
 describe('dynamodb-doc-client-wrapper', function() {
     describe('batchGet', function() {
