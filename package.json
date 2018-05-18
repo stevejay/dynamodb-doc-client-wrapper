@@ -8,13 +8,15 @@
   "engines": {
     "node": ">=4.3"
   },
-  "description": "For building complete result sets from the AWS DynamoDB API DocumentClient class",
+  "description":
+    "For building complete result sets from the AWS DynamoDB API DocumentClient class",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test mocha --growl --recursive",
+    "test": "cross-env NODE_ENV=test mocha --recursive",
     "posttest": "npm run lint",
     "lint": "eslint .",
-    "cover": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "cover":
+      "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "author": {
     "name": "Steve Johns",
@@ -22,19 +24,16 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "aws-sdk": "^2.7.15",
-    "coveralls": "^2.11.15",
-    "eslint": "^3.12.2",
+    "aws-sdk": "^2.242.1",
+    "coveralls": "^3.0.1",
+    "cross-env": "^5.1.5",
+    "eslint": "^4.19.1",
     "istanbul": "^0.4.5",
     "lodash.range": "^3.2.0",
-    "mocha": "^3.2.0",
+    "mocha": "^5.1.1",
     "mocha-lcov-reporter": "^1.2.0",
-    "should": "^11.1.1",
-    "sinon": "^2.2.0"
+    "should": "^13.2.1",
+    "sinon": "^5.0.7"
   },
-  "keywords": [
-    "dynamodb",
-    "aws-sdk",
-    "batchGet"
-  ]
+  "keywords": ["dynamodb", "aws-sdk", "batchGet"]
 }

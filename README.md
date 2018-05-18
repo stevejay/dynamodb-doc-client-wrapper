@@ -18,12 +18,14 @@ methods, returning the results as Promises.
 ```
 $ npm install --save dynamodb-doc-client-wrapper
 ```
+
 or
+
 ```
 $ yarn add dynamodb-doc-client-wrapper
 ```
 
-You also need to have the `aws-sdk` package available as a peer dependency. When running AWS Lambda functions on AWS, that package is already installed; you can install it as a dev dependency so it is available locally when testing.
+You also need to have the `aws-sdk` package available as a peer dependency. When running AWS Lambda functions on AWS, that package is already installed; you can install `aws-sdk` as a dev dependency so it is available locally when testing.
 
 ## Usage
 
@@ -32,8 +34,8 @@ You also need to have the `aws-sdk` package available as a peer dependency. When
 You should create one client wrapper instance in a file that you then require where needed elsewhere in your service. If you do not need to configure the wrapper, you can create this basic file...
 
 ```js
-const clientWrapper = require('dynamodb-doc-client-wrapper');
-exports = clientWrapper()
+const clientWrapper = require("dynamodb-doc-client-wrapper");
+module.exports = clientWrapper();
 ```
 
 ... and then require it as needed:
@@ -42,7 +44,7 @@ exports = clientWrapper()
 const dynamodbClient = require('./path/to/the/file/above')
 
 // later in a function in this file...
-const response = yield dynamodbClient.query({
+const response = await dynamodbClient.query({
     TableName: 'MyTable',
     KeyConditionExpression: 'tagType = :tagType',
     ExpressionAttributeValues: { ':tagType': 'audience' },
@@ -50,32 +52,39 @@ const response = yield dynamodbClient.query({
 });
 ```
 
-If you need to configure the wrapper, you can create a file similar to this one:
+If you need to configure the wrapper, you can instead create a file similar to this one:
 
 ```js
-const clientWrapper = require('dynamodb-doc-client-wrapper');
-const config = {
-    dynamodb: {
-        region: 'localhost',
-        endpoint: 'http://localhost:8000'
-    } 
-}
-exports = clientWrapper(config)
+const clientWrapper = require("dynamodb-doc-client-wrapper");
+
+const config = process.env.IS_OFFLINE
+  ? {
+      connection: {
+        region: "localhost",
+        endpoint: "http://localhost:8000"
+      }
+    }
+  : null;
+
+module.exports = clientWrapper(config);
 ```
 
-The options that you can pass in the config object are:
+Note: in the above example, `process.env.IS_OFFLINE` gets set by the [serverless-offline](https://github.com/dherault/serverless-offline) plugin.
 
-| Option | Description | Default Value |
-| ------------- | ------------- | ------------- |
-| dynamodb  | An [AWS.DynamoDB.DocumentClient](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#constructor-property) config object  | `null` |
-| notFoundMsg  | The message of the error thrown when a `get` or `batchGet` request returns a 404 response.  | '[404] Entity Not Found' |
+All config options are optional. The allowed options are:
+
+| Name           | Description                                                                                                                                                                                               | Default Value            |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| connection     | An [AWS.DynamoDB.DocumentClient](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#constructor-property) config object. Ignored if the `documentClient` option exists. | n/a                      |
+| documentClient | Your own preconfigured [AWS.DynamoDB.DocumentClient](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#constructor-property) instance.                                 | n/a                      |
+| notFoundMsg    | The message of the error thrown when a `get` or `batchGet` request returns a 404 response.                                                                                                                | '[404] Entity Not Found' |
 
 ### API
 
 #### Query
 
 ```js
-const response = yield clientWrapper.query({
+const response = await clientWrapper.query({
     TableName: 'MyTable',
     KeyConditionExpression: 'tagType = :tagType',
     ExpressionAttributeValues: { ':tagType': 'audience' },
@@ -92,7 +101,7 @@ on total response size in DynamoDB.
 #### QueryBasic
 
 ```js
-const response = yield clientWrapper.queryBasic({
+const response = await clientWrapper.queryBasic({
     TableName: 'MyTable',
     KeyConditionExpression: 'tagType = :tagType',
     ExpressionAttributeValues: { ':tagType': 'audience' },
@@ -110,7 +119,7 @@ you will manage getting all the results yourself.
 #### Scan
 
 ```js
-const response = yield clientWrapper.scan({
+const response = await clientWrapper.scan({
     TableName: 'MyTable',
     ProjectionExpression: 'id, label'
 });
@@ -125,7 +134,7 @@ on total response size in DynamoDB.
 #### ScanBasic
 
 ```js
-const response = yield clientWrapper.scanBasic({
+const response = await clientWrapper.scanBasic({
     TableName: 'MyTable',
     ProjectionExpression: 'id, label'
 });
@@ -141,7 +150,7 @@ you will manage getting all the results yourself.
 #### BatchGet
 
 ```js
-const response = yield clientWrapper.batchGet({
+const response = await clientWrapper.batchGet({
     RequestItems: {
         'Table1': {
             Keys: [{ id: 1 }, { id: 2 }]
@@ -172,13 +181,13 @@ All items will be retrieved, even if the number of items to be retrieved
 exceeds the DynamoDB limit of 100 items, or if the limit
 on total response size in DynamoDB was exceeded.
 
-An exception is thrown if any requested db item was not found. The 
+An exception is thrown if any requested db item was not found. The
 exception message by default is '[404] Entity Not Found'.
 
 #### BatchGetBasic
 
 ```js
-const response = yield clientWrapper.batchGetBasic({
+const response = await clientWrapper.batchGetBasic({
     RequestItems: {
         'Table1': {
             Keys: [{ id: 1 }, { id: 2 }]
@@ -192,12 +201,12 @@ const response = yield clientWrapper.batchGetBasic({
 This is a simple pass-through wrapper around the
 `AWS.DynamoDB.DocumentClient.batchGet` method, for when
 you want access to the entire response object and
-you will manage getting all the results yourself. 
+you will manage getting all the results yourself.
 
 #### Get
 
 ```js
-const response = yield clientWrapper.get({
+const response = await clientWrapper.get({
     TableName: 'MyTable',
     Index: { id: 1 }
 });
@@ -205,13 +214,13 @@ const response = yield clientWrapper.get({
 // response is the item, e.g. { id: 1, name: 'a' }
 ```
 
-An exception is thrown if the requested db item was not found. The 
+An exception is thrown if the requested db item was not found. The
 exception message by default is '[404] Entity Not Found'.
 
 #### TryGet
 
 ```js
-const response = yield clientWrapper.tryGet({
+const response = await clientWrapper.tryGet({
     TableName: 'MyTable',
     Index: { id: 1 }
 });
@@ -225,7 +234,7 @@ If the requested db item was not found then `null` is returned.
 #### GetBasic
 
 ```js
-const response = yield clientWrapper.getBasic({
+const response = await clientWrapper.getBasic({
     TableName: 'MyTable',
     Index: { id: 1 }
 });
@@ -240,7 +249,7 @@ you want access to the entire response object.
 #### Put
 
 ```js
-yield clientWrapper.put({
+await clientWrapper.put({
     TableName: 'MyTable',
     Item: { id: 1, name: 'a' }
 });
@@ -252,7 +261,7 @@ This is a simple pass-through wrapper around the
 #### BatchWrite
 
 ```js
-yield clientWrapper.batchWrite({
+await clientWrapper.batchWrite({
     RequestItems: {
         'Table1': [
             { DeleteRequest: { Key: { id: 1 } } }
@@ -267,10 +276,10 @@ but it takes care of batching up the writes so that
 a single request does not exceed the DynamoDB limits,
 and it resubmits unprocessed writes.
 
-#### BatchWriteBasic 
+#### BatchWriteBasic
 
 ```js
-yield clientWrapper.batchWriteBasic({
+await clientWrapper.batchWriteBasic({
     RequestItems: {
         'Table1': [
             { DeleteRequest: { Key: { id: 1 } } }
@@ -285,7 +294,7 @@ This is a simple pass-through wrapper around the
 #### Update
 
 ```js
-yield clientWrapper.update({
+await clientWrapper.update({
     TableName: 'Table',
     Key: { HashKey : 'hashkey' },
     UpdateExpression: 'set #a = :x + :y',
@@ -298,7 +307,7 @@ This is a simple pass-through wrapper around the
 #### Delete
 
 ```js
-yield clientWrapper.delete({
+await clientWrapper.delete({
     TableName: 'MyTable',
     Index: { id: 1 }
 });
