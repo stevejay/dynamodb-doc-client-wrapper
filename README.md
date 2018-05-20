@@ -29,16 +29,14 @@ You also need to have the `aws-sdk` package available as a peer dependency. When
 
 ## Usage
 
-### Configuration
-
-You should create one client wrapper instance in a file that you then require where needed elsewhere in your service. If you do not need to configure the wrapper, you can create this basic file...
+You should create one client wrapper instance in a file that you then require as needed elsewhere in your service. If you do not need to configure the wrapper, you can create this basic file...
 
 ```js
 const clientWrapper = require("dynamodb-doc-client-wrapper");
 module.exports = clientWrapper();
 ```
 
-... and then require it as needed:
+... and then require it wherever like so:
 
 ```js
 const dynamodbClient = require('./path/to/the/file/above')
@@ -52,7 +50,7 @@ const response = await dynamodbClient.query({
 });
 ```
 
-If you need to configure the wrapper, you can instead create a file similar to this one:
+Sometimes you need to configure the wrapper. One reason would be if you are using Dynamodb with the [serverless](https://serverless.com/) framework and the [serverless-offline](https://github.com/dherault/serverless-offline) plugin. You can achieve this like so:
 
 ```js
 const clientWrapper = require("dynamodb-doc-client-wrapper");
@@ -71,6 +69,20 @@ module.exports = clientWrapper(config);
 
 Note: in the above example, `process.env.IS_OFFLINE` gets set by the [serverless-offline](https://github.com/dherault/serverless-offline) plugin.
 
+Alternatively you can use [serverless-dynamodb-client](https://github.com/99xt/serverless-dynamodb-client), which creates a properly configured `DocumentClient` instance. You can create and use that instance like so:
+
+```js
+const dynamodb = require("serverless-dynamodb-client");
+
+const dynamodbClient = require("dynamodb-doc-client-wrapper")({
+  documentClient: dynamodb.doc
+});
+
+module.exports = dynamodbClient;
+```
+
+### Configuration Options
+
 All config options are optional. The allowed options are:
 
 | Name           | Description                                                                                                                                                                                               | Default Value            |
@@ -79,9 +91,9 @@ All config options are optional. The allowed options are:
 | documentClient | Your own preconfigured [AWS.DynamoDB.DocumentClient](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#constructor-property) instance.                                 | n/a                      |
 | notFoundMsg    | The message of the error thrown when a `get` or `batchGet` request returns a 404 response.                                                                                                                | '[404] Entity Not Found' |
 
-### API
+## API
 
-#### Query
+### Query
 
 ```js
 const response = await clientWrapper.query({
@@ -98,7 +110,7 @@ The response will have all matching items, even if the query
 had to be done in multiple takes because of the limit
 on total response size in DynamoDB.
 
-#### QueryBasic
+### QueryBasic
 
 ```js
 const response = await clientWrapper.queryBasic({
@@ -116,7 +128,7 @@ This is a simple pass-through wrapper around the
 you want access to the entire response object and
 you will manage getting all the results yourself.
 
-#### Scan
+### Scan
 
 ```js
 const response = await clientWrapper.scan({
@@ -131,7 +143,7 @@ The response will have all matching items, even if the scan
 had to be done in multiple takes because of the limit
 on total response size in DynamoDB.
 
-#### ScanBasic
+### ScanBasic
 
 ```js
 const response = await clientWrapper.scanBasic({
@@ -147,7 +159,7 @@ This is a simple pass-through wrapper around the
 you want access to the entire response object and
 you will manage getting all the results yourself.
 
-#### BatchGet
+### BatchGet
 
 ```js
 const response = await clientWrapper.batchGet({
@@ -184,7 +196,7 @@ on total response size in DynamoDB was exceeded.
 An exception is thrown if any requested db item was not found. The
 exception message by default is '[404] Entity Not Found'.
 
-#### BatchGetBasic
+### BatchGetBasic
 
 ```js
 const response = await clientWrapper.batchGetBasic({
@@ -203,7 +215,7 @@ This is a simple pass-through wrapper around the
 you want access to the entire response object and
 you will manage getting all the results yourself.
 
-#### Get
+### Get
 
 ```js
 const response = await clientWrapper.get({
@@ -217,7 +229,7 @@ const response = await clientWrapper.get({
 An exception is thrown if the requested db item was not found. The
 exception message by default is '[404] Entity Not Found'.
 
-#### TryGet
+### TryGet
 
 ```js
 const response = await clientWrapper.tryGet({
@@ -231,7 +243,7 @@ const response = await clientWrapper.tryGet({
 
 If the requested db item was not found then `null` is returned.
 
-#### GetBasic
+### GetBasic
 
 ```js
 const response = await clientWrapper.getBasic({
@@ -246,7 +258,7 @@ This is a simple pass-through wrapper around the
 `AWS.DynamoDB.DocumentClient.get` method, for when
 you want access to the entire response object.
 
-#### Put
+### Put
 
 ```js
 await clientWrapper.put({
@@ -258,7 +270,7 @@ await clientWrapper.put({
 This is a simple pass-through wrapper around the
 `AWS.DynamoDB.DocumentClient.put` method.
 
-#### BatchWrite
+### BatchWrite
 
 ```js
 await clientWrapper.batchWrite({
@@ -276,7 +288,7 @@ but it takes care of batching up the writes so that
 a single request does not exceed the DynamoDB limits,
 and it resubmits unprocessed writes.
 
-#### BatchWriteBasic
+### BatchWriteBasic
 
 ```js
 await clientWrapper.batchWriteBasic({
@@ -291,7 +303,7 @@ await clientWrapper.batchWriteBasic({
 This is a simple pass-through wrapper around the
 `AWS.DynamoDB.DocumentClient.batchWrite` method.
 
-#### Update
+### Update
 
 ```js
 await clientWrapper.update({
@@ -304,7 +316,7 @@ await clientWrapper.update({
 This is a simple pass-through wrapper around the
 `AWS.DynamoDB.DocumentClient.update` method.
 
-#### Delete
+### Delete
 
 ```js
 await clientWrapper.delete({
