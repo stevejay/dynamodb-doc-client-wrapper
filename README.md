@@ -13,6 +13,8 @@ methods, returning the results as Promises.
 
 [![NPM](https://nodei.co/npm/dynamodb-doc-client-wrapper.png)](https://nodei.co/npm/dynamodb-doc-client-wrapper/)
 
+**Note: See the instructions [here](CHANGELOG.md) for migrating from Version 1 to Version 2 of this library.**
+
 ## Installation
 
 ```
@@ -330,4 +332,4 @@ This is a simple pass-through wrapper around the
 
 ## License
 
-MIT
+[MIT](LICENSE)

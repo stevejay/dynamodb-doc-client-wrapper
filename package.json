@@ -35,5 +35,8 @@
     "should": "^13.2.1",
     "sinon": "^5.0.7"
   },
-  "keywords": ["dynamodb", "aws-sdk", "batchGet"]
+  "keywords": ["dynamodb", "aws-sdk", "batchGet"],
+  "publishConfig": {
+    "tag": "beta"
+  }
 }
