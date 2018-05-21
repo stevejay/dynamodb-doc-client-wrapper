@@ -1,6 +1,10 @@
 ## Changelog
 
-### 2.0.0@beta
+### 2.0.1
+
+Added link in README file to Version 2 migration instructions.
+
+### 2.0.0
 
 You are now able to pass configuration options to the library. Notably, you are able to pass options to the [AWS.DynamoDB.DocumentClient](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#constructor-property) constructor, for example if you want to run against a [Dynamodb Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html) instance while developing. Allowing options to be passed means that the wrapper has to be configured before use. Previously you could just use the wrapper directly:
 
