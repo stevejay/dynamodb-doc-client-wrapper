@@ -323,7 +323,7 @@ This is a simple pass-through wrapper around the
 ```js
 await clientWrapper.delete({
     TableName: 'MyTable',
-    Index: { id: 1 }
+    Key: { id: 1 }
 });
 ```
 
