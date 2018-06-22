@@ -7,9 +7,6 @@ methods, returning the results as Promises.
 [![npm version](https://badge.fury.io/js/dynamodb-doc-client-wrapper.svg)](https://badge.fury.io/js/dynamodb-doc-client-wrapper)
 [![Codeship Status for stevejay/dynamodb-doc-client-wrapper](https://app.codeship.com/projects/d832c8d0-a77d-0134-c8f7-7eca77d71521/status?branch=master)](https://app.codeship.com/projects/191146)
 [![Coverage Status](https://coveralls.io/repos/github/stevejay/dynamodb-doc-client-wrapper/badge.svg?branch=master)](https://coveralls.io/github/stevejay/dynamodb-doc-client-wrapper?branch=master)
-[![bitHound Overall Score](https://www.bithound.io/github/stevejay/dynamodb-doc-client-wrapper/badges/score.svg)](https://www.bithound.io/github/stevejay/dynamodb-doc-client-wrapper)
-[![bitHound Dependencies](https://www.bithound.io/github/stevejay/dynamodb-doc-client-wrapper/badges/dependencies.svg)](https://www.bithound.io/github/stevejay/dynamodb-doc-client-wrapper/master/dependencies/npm)
-[![bitHound Dev Dependencies](https://www.bithound.io/github/stevejay/dynamodb-doc-client-wrapper/badges/devDependencies.svg)](https://www.bithound.io/github/stevejay/dynamodb-doc-client-wrapper/master/dependencies/npm)
 
 [![NPM](https://nodei.co/npm/dynamodb-doc-client-wrapper.png)](https://nodei.co/npm/dynamodb-doc-client-wrapper/)
 
